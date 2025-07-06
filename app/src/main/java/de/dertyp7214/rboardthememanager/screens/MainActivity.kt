@@ -54,6 +54,7 @@ import de.dertyp7214.rboardcomponents.utils.asyncInto
 import de.dertyp7214.rboardcomponents.utils.doAsync
 import de.dertyp7214.rboardthememanager.BuildConfig
 import de.dertyp7214.rboardthememanager.Config
+import de.dertyp7214.rboardthememanager.Config.GBOARD_PACKAGE_NAME
 import de.dertyp7214.rboardthememanager.Config.MODULE_META
 import de.dertyp7214.rboardthememanager.Config.PATCHER_PACKAGE
 import de.dertyp7214.rboardthememanager.Config.PLAY_URL
@@ -68,6 +69,7 @@ import de.dertyp7214.rboardthememanager.core.enableBlur
 import de.dertyp7214.rboardthememanager.core.get
 import de.dertyp7214.rboardthememanager.core.getAttr
 import de.dertyp7214.rboardthememanager.core.getNavigationBarHeight
+import de.dertyp7214.rboardthememanager.core.getSystemProperty
 import de.dertyp7214.rboardthememanager.core.isReachable
 import de.dertyp7214.rboardthememanager.core.moveToCache
 import de.dertyp7214.rboardthememanager.core.notify
@@ -79,6 +81,7 @@ import de.dertyp7214.rboardthememanager.core.runAsCommand
 import de.dertyp7214.rboardthememanager.core.set
 import de.dertyp7214.rboardthememanager.core.setHeight
 import de.dertyp7214.rboardthememanager.core.setMargin
+import de.dertyp7214.rboardthememanager.core.setSystemProperty
 import de.dertyp7214.rboardthememanager.core.share
 import de.dertyp7214.rboardthememanager.core.showMaterial
 import de.dertyp7214.rboardthememanager.core.toHumanReadableBytes
@@ -253,9 +256,9 @@ class MainActivity : AppCompatActivity() {
                         setArrowOrientation(ArrowOrientation.BOTTOM)
                         setCornerRadius(resources.getDimension(R.dimen.roundCornersInner))
                         setText(getString(R.string.menu_moved))
-                        setTextColor(getAttr(com.google.android.material.R.attr.colorBackgroundFloating))
+                        setTextColor(getAttr(R.attr.colorBackgroundFloating))
                         setTextSize(12f)
-                        setBackgroundColor(getAttr(com.google.android.material.R.attr.colorPrimary))
+                        setBackgroundColor(getAttr(R.attr.colorPrimary))
                         setBalloonAnimation(BalloonAnimation.FADE)
                         setDismissWhenClicked(true)
                         setOnBalloonDismissListener {
@@ -346,7 +349,7 @@ class MainActivity : AppCompatActivity() {
                             val themes = adapter?.getSelected()?.filter {
                                 it.path.isNotEmpty() && !it.path.startsWith("assets:") && !it.path.startsWith(
                                     "system_auto:"
-                                ) && !it.path.startsWith("rboard:")
+                                ) && !it.path.startsWith("silk:") && !it.path.startsWith("rboard:")
                             }
                             if (!themes.isNullOrEmpty()) {
                                 openShareThemeDialog { dialog, name, author ->
@@ -392,7 +395,7 @@ class MainActivity : AppCompatActivity() {
                                 if (adapter != null) {
                                     val themes = adapter.getSelected().filter {
                                         it.path.isNotEmpty() && !it.path.startsWith("assets:") && !it.path.startsWith(
-                                            "rboard:"
+                                            "system_auto:") && !it.path.startsWith("silk:") && !it.path.startsWith("rboard:"
                                         )
                                     }
                                     if (themes.isNotEmpty()) {
@@ -413,7 +416,11 @@ class MainActivity : AppCompatActivity() {
                         }
 
                         R.id.select_all -> {
-                            mainViewModel.getSelections().second?.selectAll()
+                            if (mainViewModel.getSelections().second?.getSelected()?.size == mainViewModel.getThemes().size ) {
+                                mainViewModel.getSelections().second?.clearSelection()
+                            } else {
+                                mainViewModel.getSelections().second?.selectAll()
+                            }
                         }
                     }
                     true
@@ -524,6 +531,53 @@ class MainActivity : AppCompatActivity() {
                                                     findViewById<TextView>(R.id.light_theme)?.setOnClickListener {
                                                         applyTheme(false)
                                                         dialog.dismiss()
+                                                    }
+                                                    if ("ro.com.google.ime.theme_file".getSystemProperty().isNotEmpty()){
+                                                        findViewById<TextView>(R.id.reset_light_theme).visibility = VISIBLE
+                                                    }
+                                                    else{
+                                                        findViewById<TextView>(R.id.reset_light_theme).visibility = GONE
+                                                    }
+                                                    if ("ro.com.google.ime.d_theme_file".getSystemProperty().isNotEmpty()){
+                                                        findViewById<TextView>(R.id.reset_dark_theme).visibility = VISIBLE
+                                                    }
+                                                    else{
+                                                        findViewById<TextView>(R.id.reset_dark_theme).visibility = GONE
+                                                    }
+                                                    findViewById<TextView>(R.id.reset_dark_theme)?.setOnClickListener {
+                                                        openDialog(R.string.system_automatic_reset_long_question, R.string.system_automatic_reset_question, false) {
+                                                            "ro.com.google.ime.d_theme_file".setSystemProperty(saveToModule = true)
+                                                            Flags.run {
+                                                                if (flagValues["oem_dark_theme"] == true) {
+                                                                    setUpFlags()
+                                                                    setValue(false, "oem_dark_theme", Flags.FILES.FLAGS)
+                                                                    applyChanges()
+                                                                }
+                                                            }
+                                                            if ("am force-stop $GBOARD_PACKAGE_NAME".runAsCommand()) {
+                                                                dialog.dismiss()
+                                                                Toast.makeText(
+                                                                    applicationContext,
+                                                                    R.string.dark_theme_reset,
+                                                                    Toast.LENGTH_SHORT
+                                                                ).show()
+                                                            } else Toast.makeText(applicationContext, R.string.error, Toast.LENGTH_SHORT)
+                                                                .show()
+                                                        }
+                                                    }
+                                                    findViewById<TextView>(R.id.reset_light_theme)?.setOnClickListener {
+                                                        openDialog(R.string.system_automatic_reset_long_question, R.string.system_automatic_reset_question, false) {
+                                                            "ro.com.google.ime.theme_file".setSystemProperty(saveToModule = true)
+                                                            if ("am force-stop $GBOARD_PACKAGE_NAME".runAsCommand()) {
+                                                                dialog.dismiss()
+                                                                Toast.makeText(
+                                                                    applicationContext,
+                                                                    R.string.light_theme_reset,
+                                                                    Toast.LENGTH_SHORT
+                                                                ).show()
+                                                            } else Toast.makeText(applicationContext, R.string.error, Toast.LENGTH_SHORT)
+                                                                .show()
+                                                        }
                                                     }
                                                     findViewById<MaterialButton>(R.id.cancel)?.setOnClickListener { dialog.dismiss() }
                                                     findViewById<MaterialButton>(R.id.ok)?.setOnClickListener { dialog.dismiss() }
@@ -662,6 +716,10 @@ class MainActivity : AppCompatActivity() {
                     navigation.selectedItemId = id
                 }
             }
+            if (Config.useMagisk){
+                preferences.edit { putBoolean("useMagisk", false) }
+                recreate();
+            }
         }
     }
 
@@ -721,32 +779,7 @@ class MainActivity : AppCompatActivity() {
 
         val preferenceManager = PreferenceManager.getDefaultSharedPreferences(this)
 
-        if (!preferenceManager.getBoolean("usageSet", false)) {
-            UsageDialog.open(this, onGboard = {
-                it.dismiss()
-                preferenceManager.edit {
-                    putBoolean("useMagisk", false)
-                    putBoolean("usageSet", true)
-                }
-                Config.useMagisk = false
-                ThemeUtils::loadThemes asyncInto mainViewModel::setThemes
-            }, onMagisk = { dialogFragment ->
-                dialogFragment.dismiss()
-                preferenceManager.edit {
-                    putBoolean("useMagisk", true)
-                    putBoolean("usageSet", true)
-                }
-                Config.useMagisk = true
-                ThemeUtils::loadThemes asyncInto mainViewModel::setThemes
-                if (ThemeUtils.checkForExistingThemes()) openDialog(
-                    R.string.install_module,
-                    R.string.module
-                ) {
-                    it.dismiss()
-                    MagiskUtils.installModule(this)
-                } else MagiskUtils.installModule(this)
-            })
-        } else if (intent.getBooleanExtra(
+        if (intent.getBooleanExtra(
                 "update",
                 this@MainActivity.intent.getBooleanExtra("update", false)
             )
