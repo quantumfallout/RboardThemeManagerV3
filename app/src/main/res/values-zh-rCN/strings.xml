@@ -81,7 +81,7 @@
     <string name="general">通用</string>
     <string name="show_branding_on_space">Google 空格标志</string>
     <string name="show_branding_on_space_details">在空格上显示 G 标志</string>
-    <string name="enable_auto_float_keyboard_in_multi_window">在多窗口中自动启用悬浮键盘</string>
+    <string name="enable_auto_float_keyboard_in_multi_window">自动启用悬浮键盘</string>
     <string name="pill_shaped_key">药丸形按键</string>
     <string name="enable_clipboard_screenshot_paste">启用剪贴板截图</string>
     <string name="enable_lens">启用智能镜头</string>
@@ -247,7 +247,7 @@
     <string name="silk_popup">Silk 主题气泡</string>
     <string name="silk">Silk 气泡</string>
     <string name="silk_details">Silk 主题的按键气泡</string>
-    <string name="keyboard_redesign_google_sans">在键盘上启用 Google Sans 字体</string>
+    <string name="keyboard_redesign_google_sans">Google Sans 字体</string>
     <string name="gboard_cache_cleared">Gboard 缓存已清除</string>
     <string name="gboard_cache_clear">清除 Gboard 缓存</string>
     <string name="gboard_cache_clear_long">清除缓存文件并强行关闭 Gboard</string>
@@ -320,4 +320,14 @@
     <string name="gboard_cache_clear_question">清除 Gboard 缓存</string>
     <string name="gboard_cache_clear_long_question">你确定要清除缓存文件, 并强行关闭 Gboard 吗?</string>
     <string name="clear_recent_emojis_question">你确定要清除emoji表情使用记录, 并强行关闭 Gboard 吗?</string>
+    <string name="select_prefs">请选择至少一个偏好项目</string>
+    <string name="select_flags">请选择至少一个flag值</string>
+    <string name="dark_theme_reset">重置深色主题</string>
+    <string name="light_theme_reset">重置浅色主题</string>
+    <string name="system_automatic_reset_question">重置自动深浅主题</string>
+    <string name="system_automatic_reset_long_question">你确定要重置自动深浅主题, 并强行关闭 Gboard 吗?</string>
+    <string name="newTag">新</string>
+    <string name="succesful_copied">复制成功</string>
+    <string name="enable_text_preview">文本预览</string>
+    <string name="enable_text_preview_details">在键盘上方显示文本预览</string>
 </resources>
